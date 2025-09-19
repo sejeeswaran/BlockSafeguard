@@ -120,7 +120,7 @@ contract_abi = [
 	}
 ]# Auto-updated ABI from abi.json
 account = '0x270A9189557868B5e6dd369FdC024F7997D8A8be'
-private_key = '4bd49d03e2495ce0de6b5b8fa65fd867029ed76edd5cf9d27735bc2db36efcee'   # Use DEDICATED TEST ACCOUNT ONLY
+private_key = 'TEST ACCOUNT PVT KEY'   # Use DEDICATED TEST ACCOUNT ONLY
 
 def log_suspicious_ip(ip, reason):
     web3 = Web3(Web3.HTTPProvider(infura_url))
