@@ -1,8 +1,8 @@
 import boto3
 
 # Configuration for AWS NACL blocking
-nacl_id = 'acl-0554fe5ac1682fbae'  # Your Network ACL ID
-region = 'ap-south-1'  # Use your EC2 region
+nacl_id = 'YOUR AWS ACL ID'  # Your Network ACL ID
+region = 'YOUR EC2 REGION'  # Use your EC2 region
 rule_number_counter = 100  # Starting rule number for deny rules
 blocked_ip_rules = {}  # Track IP to rule number mapping for unblocking
 
