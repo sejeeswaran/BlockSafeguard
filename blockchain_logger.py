@@ -2,7 +2,7 @@ from web3 import Web3
 
 # --- Configure these variables (get from Remix after contract deployment) ----
 infura_url = 'https://sepolia.infura.io/v3/cda4d32c4bc24ed6828b761dffdf6d90'
-contract_address = '0x5a4ED6ce4b19EB10BCc658190FBA0087e860ee92'
+contract_address = 'YOUR CONTRACT ADDRESS'
 contract_abi = [
 	{
 		"inputs": [
