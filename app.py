@@ -14,7 +14,7 @@ from firebase_client import get_user_by_email
 
 def verify_password(email, password):
     # Replace with your actual Firebase Web API Key from Firebase Console > Project Settings > General > Web API Key
-    api_key = "AIzaSyCIzMKnO9AaKRVyD50QHxZ7p8kf1G14sQc"
+    api_key = "FIREBASE KEY"
     url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={api_key}"
     data = {
         "email": email,
