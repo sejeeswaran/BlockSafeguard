@@ -1,0 +1,69 @@
+{
+  "passed": 9,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "Normal Access",
+      "passed": true,
+      "message": "Website accessible",
+      "details": "Status: 200",
+      "timestamp": "2025-09-18T22:07:49.702523"
+    },
+    {
+      "name": "API Status",
+      "passed": true,
+      "message": "API responding",
+      "details": "Status: active",
+      "timestamp": "2025-09-18T22:08:01.892714"
+    },
+    {
+      "name": "API Block Check",
+      "passed": true,
+      "message": "API working: allow",
+      "details": "Response: {'action': 'allow', 'status': 'clean', 'timestamp': '2025-09-18 22:08:02'}",
+      "timestamp": "2025-09-18T22:08:02.897380"
+    },
+    {
+      "name": "DDoS Simulation",
+      "passed": true,
+      "message": "Attack detected and blocked",
+      "details": "Blocked: 452, Success: 148, Errors: 0",
+      "timestamp": "2025-09-18T22:08:24.137635"
+    },
+    {
+      "name": "DDoS Simulation",
+      "passed": true,
+      "message": "Attack detected and blocked",
+      "details": "Blocked: 600, Success: 0, Errors: 0",
+      "timestamp": "2025-09-18T22:08:31.537552"
+    },
+    {
+      "name": "IP Blocking",
+      "passed": true,
+      "message": "IP successfully blocked",
+      "details": "403 Forbidden returned",
+      "timestamp": "2025-09-18T22:08:33.541428"
+    },
+    {
+      "name": "Status Page",
+      "passed": true,
+      "message": "Status page accessible",
+      "details": "Contains blocking information",
+      "timestamp": "2025-09-18T22:08:46.375126"
+    },
+    {
+      "name": "DDoS Simulation",
+      "passed": true,
+      "message": "Attack detected and blocked",
+      "details": "Blocked: 600, Success: 0, Errors: 0",
+      "timestamp": "2025-09-18T22:08:53.764939"
+    },
+    {
+      "name": "Blockchain Logging",
+      "passed": true,
+      "message": "Blockchain data accessible",
+      "details": "Blocked IPs: 10",
+      "timestamp": "2025-09-18T22:09:09.779242"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+# Sensitive Files  
+*.pem  
+*-adminsdk-*.json  
+ec2-user@* 
+# Sensitive files - NEVER commit these!
+*.json
+firebase_client.py
+blocksafeguard-*-firebase-adminsdk-*.json
+blocksecurity-*-firebase-adminsdk-*.json
+
+# Private keys
+ddos-key.pem
+*.pem
+*.key
+
+# Logs
+*.log
+blocksafeguard.log
+
+# Environment files
+.env
+.env.local
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

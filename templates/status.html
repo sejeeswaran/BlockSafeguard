@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockSafeguard - Status Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4rem 0;
+        }
+        .status-card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .blocked-ip-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="/">
+                <i class="bi bi-shield-check"></i> BlockSafeguard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/status">Dashboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-4">Security Status Dashboard</h1>
+            <p class="lead mb-4">Monitor blocked IPs and service status in real-time</p>
+        </div>
+    </section>
+
+    <!-- Status Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card status-card h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Current Status</h5>
+                            <p class="card-text fs-4">{{ status }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card status-card h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Blocked IPs Count</h5>
+                            <p class="card-text fs-4">{{ blocked_count }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card status-card h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Unblocked IPs Count</h5>
+                            <p class="card-text fs-4">{{ unblocked_count }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card status-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">List of Blocked IP Addresses</h5>
+                        </div>
+                        <div class="card-body blocked-ip-list">
+                            {% if blocked_ips %}
+                                <ul class="list-group list-group-flush">
+                                    {% for item in blocked_ips %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>{{ item.ip }}</strong> - Reason: {{ item.reason }} - Timestamp: {{ item.timestamp }}
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#unblockModal" data-ip="{{ item.ip }}">Unblock</button>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-muted">No blocked IPs yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card status-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">List of Unblocked IP Addresses</h5>
+                        </div>
+                        <div class="card-body unblocked-ip-list" style="max-height: 400px; overflow-y: auto;">
+                            {% if unblocked_ips %}
+                                <ul class="list-group list-group-flush">
+                                    {% for item in unblocked_ips %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>{{ item.ip }}</strong> - Unblocked by: {{ item.unblocked_by }} - Timestamp: {{ item.timestamp }}
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#blockModal" data-ip="{{ item.ip }}">Block</button>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-muted">No unblocked IPs yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>BlockSafeguard</h5>
+                    <p>Enterprise-grade DDoS protection and cloud security solutions</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; BlockSafeguard</p>
+                    <p>Contact: blocksafeguard@gmail.com</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Real-time updates script -->
+    <script>
+        function updateLists() {
+            fetch('/status')
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const newDoc = parser.parseFromString(html, 'text/html');
+
+                    // Update blocked IPs list
+                    const newBlockedList = newDoc.querySelector('.blocked-ip-list');
+                    const currentBlockedList = document.querySelector('.blocked-ip-list');
+                    if (newBlockedList && currentBlockedList) {
+                        currentBlockedList.innerHTML = newBlockedList.innerHTML;
+                    }
+
+                    // Update unblocked IPs list
+                    const newUnblockedList = newDoc.querySelector('.unblocked-ip-list');
+                    const currentUnblockedList = document.querySelector('.unblocked-ip-list');
+                    if (newUnblockedList && currentUnblockedList) {
+                        currentUnblockedList.innerHTML = newUnblockedList.innerHTML;
+                    }
+
+                    // Update counts - need to be specific since there are two .card-text.fs-4
+                    const newCounts = newDoc.querySelectorAll('.card-text.fs-4');
+                    const currentCounts = document.querySelectorAll('.card-text.fs-4');
+                    if (newCounts.length === currentCounts.length) {
+                        for (let i = 0; i < newCounts.length; i++) {
+                            currentCounts[i].textContent = newCounts[i].textContent;
+                        }
+                    }
+                })
+                .catch(error => console.error('Error updating lists:', error));
+        }
+
+        // Update every 30 seconds
+        setInterval(updateLists, 30000);
+
+        // Initial update after 5 seconds
+        setTimeout(updateLists, 5000);
+    </script>
+
+    <!-- Unblock Confirmation Modal -->
+    <div class="modal fade" id="unblockModal" tabindex="-1" aria-labelledby="unblockModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="unblockModalLabel">Confirm Unblock</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="" method="post" id="unblockForm">
+                    <div class="modal-body">
+                        <p>Enter your password to unblock IP: <span id="unblockModalIP"></span></p>
+                        <input type="password" name="password" placeholder="Password" required class="form-control">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning">Unblock</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Block Confirmation Modal -->
+    <div class="modal fade" id="blockModal" tabindex="-1" aria-labelledby="blockModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="blockModalLabel">Confirm Block</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="" method="post" id="blockForm">
+                    <div class="modal-body">
+                        <p>Enter your password to block IP: <span id="blockModalIP"></span></p>
+                        <input type="password" name="password" placeholder="Password" required class="form-control">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Block</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var unblockModal = document.getElementById('unblockModal');
+        unblockModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var ip = button.getAttribute('data-ip');
+            var form = document.getElementById('unblockForm');
+            form.action = '/unblock/' + ip;
+            document.getElementById('unblockModalIP').textContent = ip;
+        });
+
+        var blockModal = document.getElementById('blockModal');
+        blockModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var ip = button.getAttribute('data-ip');
+            var form = document.getElementById('blockForm');
+            form.action = '/block/' + ip;
+            document.getElementById('blockModalIP').textContent = ip;
+        });
+
+        // Handle form submissions with AJAX
+        document.getElementById('unblockForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Success, close modal and update lists
+                    bootstrap.Modal.getInstance(unblockModal).hide();
+                    updateLists();
+                } else {
+                    alert(data.error || 'An error occurred. Please try again.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('blockForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Success, close modal and update lists
+                    bootstrap.Modal.getInstance(blockModal).hide();
+                    updateLists();
+                } else {
+                    alert(data.error || 'An error occurred. Please try again.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>

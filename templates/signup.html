@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockSafeguard - Sign Up</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <style>
+        .signup-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+        .signup-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 2rem;
+            width: 100%;
+            max-width: 450px;
+        }
+        .signup-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+        }
+        .btn-signup {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            width: 100%;
+        }
+        .btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <section class="signup-section">
+            <div class="signup-card">
+                <div class="signup-header">
+                    <h2 class="mb-3">Create Account</h2>
+                    <p class="text-muted">Join BlockSafeguard for enterprise-grade protection</p>
+                </div>
+                <form method="POST">
+                    {% if message %}
+                        <div class="alert alert-info" role="alert">{{ message }}</div>
+                    {% endif %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last name" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="company" class="form-label">Company (Optional)</label>
+                        <input type="text" class="form-control" id="company" name="company" placeholder="Your company">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Create a password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+                    </div>
+
+                    <!-- Notification Settings -->
+                    <hr class="my-4">
+                    <h5 class="mb-3">Security Notification Settings</h5>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="enableNotifications" name="enableNotifications">
+                        <label class="form-check-label" for="enableNotifications">
+                            Enable email notifications for DDoS attacks
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notificationEmail" class="form-label">Notification Email</label>
+                        <input type="email" class="form-control" id="notificationEmail" name="notificationEmail" placeholder="Email for security alerts">
+                        <small class="form-text text-muted">Leave blank to use your signup email</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gmailAppPassword" class="form-label">Gmail App Password</label>
+                        <input type="password" class="form-control" id="gmailAppPassword" name="gmailAppPassword" placeholder="16-character Gmail app password">
+                        <div class="form-text">
+                            <strong>⚠️ Required if notifications are enabled:</strong><br>
+                            1. Visit: <a href="https://myaccount.google.com/apppasswords" target="_blank" class="text-decoration-none">https://myaccount.google.com/apppasswords</a><br>
+                            2. Sign in to your Gmail account<br>
+                            3. Generate password for "Mail"<br>
+                            4. Copy the 16-character password and paste it here
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
+                        <label class="form-check-label" for="terms">
+                            I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-signup">Create Account</button>
+                </form>
+                <div class="login-link">
+                    <p class="mb-0">Already have an account? <a href="/login" class="text-decoration-none">Sign in here</a></p>
+                </div>
+            </div>
+    </section>
+</body>
+</html>
