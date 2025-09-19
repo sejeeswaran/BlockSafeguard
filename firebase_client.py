@@ -7,7 +7,7 @@ import logging
 
 def initialize_firebase():
     # Path to your Firebase service account key JSON file
-    cred = credentials.Certificate("blocksafeguard-5f3df-firebase-adminsdk-fbsvc-d590732ddd.json")
+    cred = credentials.Certificate("FIREBASE JSON FILE NAME")
     try:
         firebase_admin.initialize_app(cred)
         logging.info("Firebase app initialized successfully.")
