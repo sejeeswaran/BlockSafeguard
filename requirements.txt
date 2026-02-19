@@ -1,6 +1,5 @@
 Flask
 firebase-admin
-web3
 boto3
+web3
 python-dotenv
-requests

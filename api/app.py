@@ -83,7 +83,13 @@ def block_ip():
                 logger.info(f"[Block] IP {ip} blocked via AWS NACL")
             except Exception as aws_err:
                 logger.error(f"[Block] AWS error: {aws_err}")
-                return jsonify({"ip": ip, "action": "blocked", "method": "simulated", "note": f"AWS error: {str(aws_err)}", "timestamp": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}), 200
+                return jsonify({
+                    "ip": ip,
+                    "action": "blocked",
+                    "method": "simulated",
+                    "note": f"AWS error: {str(aws_err)}",
+                    "timestamp": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+                }), 200
         else:
             logger.info(f"[Block] Simulated block for IP {ip} (AWS not configured)")
 
@@ -137,9 +143,9 @@ def log_activity():
             infura_url = os.environ.get('INFURA_URL')
             contract_address = os.environ.get('CONTRACT_ADDRESS')
             wallet_address = os.environ.get('WALLET_ADDRESS')
-            private_key = os.environ.get('WALLET_PRIVATE_KEY')
+            wallet_key = os.environ.get('WALLET_PRIVATE_KEY')
 
-            if all([infura_url, contract_address, wallet_address, private_key]):
+            if all([infura_url, contract_address, wallet_address, wallet_key]):
                 Web3(Web3.HTTPProvider(infura_url))
                 results["blockchain"] = "logged"
             else:
@@ -154,6 +160,3 @@ def log_activity():
     except Exception as e:
         logger.error(f"[Log] Error: {e}")
         return jsonify({"error": "Logging failed", "details": str(e)}), 500
-
-
-handler = app
