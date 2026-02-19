@@ -140,7 +140,7 @@ def log_activity():
             private_key = os.environ.get('WALLET_PRIVATE_KEY')
 
             if all([infura_url, contract_address, wallet_address, private_key]):
-                web3 = Web3(Web3.HTTPProvider(infura_url))
+                Web3(Web3.HTTPProvider(infura_url))
                 results["blockchain"] = "logged"
             else:
                 results["blockchain"] = "skipped (missing env vars)"
