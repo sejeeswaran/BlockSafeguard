@@ -1,126 +1,20 @@
 from web3 import Web3
+import json
+import os
+from dotenv import load_dotenv
 
-# --- Configure these variables (get from Remix after contract deployment) ----
-infura_url = 'https://sepolia.infura.io/v3/cda4d32c4bc24ed6828b761dffdf6d90'
-contract_address = 'YOUR CONTRACT ADDRESS'
-contract_abi = [
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "ip",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "reason",
-				"type": "string"
-			}
-		],
-		"name": "addIP",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"anonymous": False,
-		"inputs": [
-			{
-				"indexed": False,
-				"internalType": "string",
-				"name": "ip",
-				"type": "string"
-			},
-			{
-				"indexed": False,
-				"internalType": "string",
-				"name": "reason",
-				"type": "string"
-			},
-			{
-				"indexed": False,
-				"internalType": "uint256",
-				"name": "timestamp",
-				"type": "uint256"
-			}
-		],
-		"name": "Blacklisted",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "blacklist",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "ip",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "reason",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "timestamp",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "index",
-				"type": "uint256"
-			}
-		],
-		"name": "getIP",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getLength",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	}
-]# Auto-updated ABI from abi.json
-account = '0x270A9189557868B5e6dd369FdC024F7997D8A8be'
-private_key = 'TEST ACCOUNT PVT KEY'   # Use DEDICATED TEST ACCOUNT ONLY
+load_dotenv()
+
+# --- Load configuration from environment variables ----
+infura_url = os.environ.get('INFURA_URL')
+contract_address = os.environ.get('CONTRACT_ADDRESS')
+
+# Load ABI from file
+with open('abi.json', 'r') as f:
+    contract_abi = json.load(f)
+
+account = os.environ.get('WALLET_ADDRESS')
+private_key = os.environ.get('WALLET_PRIVATE_KEY')
 
 def log_suspicious_ip(ip, reason):
     web3 = Web3(Web3.HTTPProvider(infura_url))

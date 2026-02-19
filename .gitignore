@@ -1,25 +1,19 @@
-# Sensitive Files  
-*.pem  
-*-adminsdk-*.json  
-ec2-user@* 
-# Sensitive files - NEVER commit these!
-*.json
-firebase_client.py
+# Environment files - NEVER commit these!
+.env
+.env.local
+
+# Firebase service account keys
 blocksafeguard-*-firebase-adminsdk-*.json
 blocksecurity-*-firebase-adminsdk-*.json
+*-adminsdk-*.json
 
 # Private keys
-ddos-key.pem
 *.pem
 *.key
+ec2-user@*
 
 # Logs
 *.log
-blocksafeguard.log
-
-# Environment files
-.env
-.env.local
 
 # Python cache
 __pycache__/

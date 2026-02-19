@@ -1,13 +1,16 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
 from firebase_admin import auth
+import os
+import logging
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Initialize Firebase Admin SDK
-import logging
-
 def initialize_firebase():
-    # Path to your Firebase service account key JSON file
-    cred = credentials.Certificate("FIREBASE JSON FILE NAME")
+    service_account_path = os.environ.get('FIREBASE_SERVICE_ACCOUNT')
+    cred = credentials.Certificate(service_account_path)
     try:
         firebase_admin.initialize_app(cred)
         logging.info("Firebase app initialized successfully.")

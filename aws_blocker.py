@@ -1,8 +1,12 @@
 import boto3
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configuration for AWS NACL blocking
-nacl_id = 'YOUR AWS ACL ID'  # Your Network ACL ID
-region = 'YOUR EC2 REGION'  # Use your EC2 region
+nacl_id = os.environ.get('AWS_NACL_ID')
+region = os.environ.get('AWS_REGION')
 rule_number_counter = 100  # Starting rule number for deny rules
 blocked_ip_rules = {}  # Track IP to rule number mapping for unblocking
 

@@ -6,15 +6,17 @@ import threading
 import smtplib
 from email.mime.text import MIMEText
 import logging
-import secrets
+import os
 import requests
+from dotenv import load_dotenv
 from firebase_client import signup_user
 from firebase_client import log_activity
 from firebase_client import get_user_by_email
 
+load_dotenv()
+
 def verify_password(email, password):
-    # Replace with your actual Firebase Web API Key from Firebase Console > Project Settings > General > Web API Key
-    api_key = "FIREBASE KEY"
+    api_key = os.environ.get('FIREBASE_API_KEY')
     url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={api_key}"
     data = {
         "email": email,
@@ -33,7 +35,7 @@ def verify_password(email, password):
         return False
 
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(32)  # Generate secure secret key for session management
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', os.urandom(32).hex())
 
 # Configure comprehensive logging
 logging.basicConfig(
@@ -53,6 +55,11 @@ DDOS_THRESHOLD = 9     # requests per minute
 # Email configuration for notifications (now dynamic from Firebase)
 SMTP_SERVER = 'smtp.gmail.com'
 SMTP_PORT = 587
+
+# Constants for repeated string literals
+SIGNUP_TEMPLATE = 'signup.html'
+ERR_INVALID_API_KEY = "Invalid API key"
+ERR_INTERNAL_SERVER = "Internal server error"
 
 # Hybrid blocking: NACL (network) + Proactive checking (application)
 blocked_ips_proactive = set()  # For proactive application-level checking
@@ -162,17 +169,6 @@ def monitor_traffic():
     requests_per_ip[ip] = [t for t in requests_per_ip[ip] if (now - t) < 60]
     requests_per_ip[ip].append(now)
 
-    # Advanced detection: different thresholds for different endpoints
-    path = request.path
-    if path.startswith('/status') or path.startswith('/login') or path.startswith('/signup'):
-        threshold = 10  # Higher threshold for auth pages
-    elif path.startswith('/unblock'):
-        threshold = 5   # Lower for admin actions
-    else:
-        threshold = DDOS_THRESHOLD  # Default
-
-    # Check for suspicious patterns
-    user_agent = request.headers.get('User-Agent', '')
 
     # More reasonable detection for normal web browsing
     current_count = len(requests_per_ip[ip])
@@ -254,15 +250,15 @@ def signup():
         # Validate notification settings
         if enable_notifications and not gmail_app_password:
             message = "Gmail App Password is required when notifications are enabled."
-            return render_template('signup.html', message=message)
+            return render_template(SIGNUP_TEMPLATE, message=message)
 
         # Validate password match, terms accepted, etc.
         if password != confirm_password:
             message = "Passwords do not match."
-            return render_template('signup.html', message=message)
+            return render_template(SIGNUP_TEMPLATE, message=message)
         if not terms:
             message = "You must accept the terms and conditions."
-            return render_template('signup.html', message=message)
+            return render_template(SIGNUP_TEMPLATE, message=message)
 
         try:
             # Call to create Firebase auth user and store extra data
@@ -295,7 +291,7 @@ def signup():
             print(f"Error during signup: {e}")
             message = "Signup failed. Try again."
 
-    return render_template('signup.html', message=message)
+    return render_template(SIGNUP_TEMPLATE, message=message)
 
 @app.route('/logout')
 def logout():
@@ -379,7 +375,7 @@ def api_status(api_key):
     try:
         # Simple API key validation (in production, use proper authentication)
         if api_key != 'demo_key':
-            return jsonify({"error": "Invalid API key"}), 401
+            return jsonify({"error": ERR_INVALID_API_KEY}), 401
 
         # Get blocked IPs from blockchain
         from blockchain_logger import get_blocked_ips_from_blockchain
@@ -396,7 +392,7 @@ def api_status(api_key):
 
     except Exception as e:
         logger.error(f"API status error: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": ERR_INTERNAL_SERVER}), 500
 
 @app.route('/api/check', methods=['POST'])
 def api_check():
@@ -409,11 +405,11 @@ def api_check():
 
         api_key = data.get('api_key')
         ip = data.get('ip', request.remote_addr)
-        user_agent = data.get('user_agent', '')
+
 
         # Simple API key validation
         if api_key != 'demo_key':
-            return jsonify({"error": "Invalid API key"}), 401
+            return jsonify({"error": ERR_INVALID_API_KEY}), 401
 
         # Check if IP is blocked
         if ip in blocked_ips_proactive:
@@ -434,14 +430,14 @@ def api_check():
 
     except Exception as e:
         logger.error(f"API check error: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": ERR_INTERNAL_SERVER}), 500
 
 @app.route('/api/unblock/<api_key>/<ip>', methods=['POST'])
 def api_unblock(api_key, ip):
     """API endpoint to unblock an IP"""
     try:
         if api_key != 'demo_key':
-            return jsonify({"error": "Invalid API key"}), 401
+            return jsonify({"error": ERR_INVALID_API_KEY}), 401
 
         if ip in blocked_ips_proactive:
             blocked_ips_proactive.discard(ip)
@@ -459,7 +455,7 @@ def api_unblock(api_key, ip):
 
     except Exception as e:
         logger.error(f"API unblock error: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": ERR_INTERNAL_SERVER}), 500
 #@app.route('/debug/clear')
 #def debug_clear():
     if 'first_name' in session:  # Only logged-in users
