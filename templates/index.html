@@ -1,38 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Enterprise-grade DDoS protection and cloud security solutions for your business">
     <meta name="keywords" content="DDoS protection, cloud security, cybersecurity, web application firewall">
-    <title>BlockSafeguard - Enterprise DDoS Protection & Cloud Security</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <title>BlockSafeguard</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='bsguard.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
     <style>
         .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background-color: #764ba2;
+            background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
             padding: 4rem 0;
         }
+
         .feature-card {
             transition: transform 0.3s ease;
             border: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         .feature-card:hover {
             transform: translateY(-5px);
         }
+
         .stats-number {
             font-size: 2.5rem;
             font-weight: bold;
             color: #667eea;
         }
+
         .nav-link {
             font-weight: 500;
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
@@ -53,22 +64,25 @@
                         <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#contactModal">Contact</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{% if first_name %}/status{% else %}/login{% endif %}">Dashboard</a>
+                        <a class="btn btn-primary ms-2"
+                            href="{% if first_name %}/status{% else %}/login{% endif %}">Dashboard</a>
                     </li>
                     {% if first_name %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="nav-link dropdown-toggle btn btn-link" id="userDropdown"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle"></i> {{ first_name }}
-                        </a>
+                        </button>
                         <ul class="dropdown-menu" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="/logout">Sign Out</a></li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="nav-link dropdown-toggle btn btn-link" id="navbarDropdown"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle"></i> Profile
-                        </a>
+                        </button>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="/login">Login</a></li>
                             <li><a class="dropdown-item" href="/signup">Sign Up</a></li>
@@ -86,7 +100,8 @@
             <h1 class="display-4 fw-bold mb-4">Enterprise-Grade DDoS Protection</h1>
             <p class="lead mb-4">Protect your business from cyber threats with our advanced cloud security solutions</p>
             <div class="d-flex justify-content-center gap-3">
-                <a href="{% if first_name %}/status{% else %}/login{% endif %}" class="btn btn-light btn-lg">Get Started</a>
+                <a href="{% if first_name %}/status{% else %}/login{% endif %}" class="btn btn-light btn-lg">Get
+                    Started</a>
                 <a href="#features" class="btn btn-outline-light btn-lg">Learn More</a>
             </div>
         </div>
@@ -124,7 +139,8 @@
                     <div class="card feature-card h-100">
                         <div class="card-body text-center">
                             <h5 class="card-title">DDoS Mitigation</h5>
-                            <p class="card-text">Real-time detection and mitigation of volumetric, protocol, and application layer attacks</p>
+                            <p class="card-text">Real-time detection and mitigation of volumetric, protocol, and
+                                application layer attacks</p>
                         </div>
                     </div>
                 </div>
@@ -132,7 +148,8 @@
                     <div class="card feature-card h-100">
                         <div class="card-body text-center">
                             <h5 class="card-title">WAF Protection</h5>
-                            <p class="card-text">Web Application Firewall with custom rules and threat intelligence integration</p>
+                            <p class="card-text">Web Application Firewall with custom rules and threat intelligence
+                                integration</p>
                         </div>
                     </div>
                 </div>
@@ -148,7 +165,7 @@
         </div>
     </section>
 
-    
+
 
     <!-- Footer -->
     <footer class="bg-dark text-white py-4">
@@ -176,7 +193,8 @@
                 </div>
                 <div class="modal-body">
                     <p>Get in touch with us:</p>
-                    <p><strong>Email:</strong> <a href="mailto:blocksafeguard@gmail.com">blocksafeguard@gmail.com</a></p>
+                    <p><strong>Email:</strong> <a href="mailto:blocksafeguard@gmail.com">blocksafeguard@gmail.com</a>
+                    </p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -185,4 +203,5 @@
         </div>
     </div>
 </body>
+
 </html>
