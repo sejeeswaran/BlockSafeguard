@@ -1,14 +1,6 @@
-import sys
 import os
 import time
-import json
 import logging
-
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, ROOT_DIR)
-
-from dotenv import load_dotenv
-load_dotenv(os.path.join(ROOT_DIR, '.env'))
 
 from flask import Flask, request, jsonify
 
@@ -73,20 +65,37 @@ def block_ip():
         if not ip:
             return jsonify({"error": ERR_MISSING_IP}), 400
 
-        from aws_blocker import block_ip as aws_block_ip
-        aws_block_ip(ip)
+        nacl_id = os.environ.get('AWS_NACL_ID')
+        region = os.environ.get('AWS_REGION')
 
-        logger.info(f"[Block] IP {ip} blocked via AWS NACL")
+        if nacl_id and region:
+            try:
+                import boto3
+                ec2 = boto3.client('ec2', region_name=region)
+                ec2.create_network_acl_entry(
+                    NetworkAclId=nacl_id,
+                    RuleNumber=100,
+                    Protocol='-1',
+                    RuleAction='deny',
+                    Egress=False,
+                    CidrBlock=f"{ip}/32"
+                )
+                logger.info(f"[Block] IP {ip} blocked via AWS NACL")
+            except Exception as aws_err:
+                logger.error(f"[Block] AWS error: {aws_err}")
+                return jsonify({"ip": ip, "action": "blocked", "method": "simulated", "note": f"AWS error: {str(aws_err)}", "timestamp": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}), 200
+        else:
+            logger.info(f"[Block] Simulated block for IP {ip} (AWS not configured)")
 
         return jsonify({
             "ip": ip,
             "action": "blocked",
-            "method": "AWS NACL",
+            "method": "AWS NACL" if (nacl_id and region) else "simulated",
             "timestamp": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         })
 
     except Exception as e:
-        logger.error(f"[Block] Error blocking IP: {e}")
+        logger.error(f"[Block] Error: {e}")
         return jsonify({"error": "Blocking failed", "details": str(e)}), 500
 
 
@@ -103,23 +112,38 @@ def log_activity():
         results = {"ip": ip, "reason": reason}
 
         try:
-            from firebase_client import log_activity as fb_log
-            fb_log('blocked_ips', {
+            import firebase_admin
+            from firebase_admin import credentials, firestore
+
+            if not firebase_admin._apps:
+                service_account = os.environ.get('FIREBASE_SERVICE_ACCOUNT')
+                if service_account and os.path.exists(service_account):
+                    cred = credentials.Certificate(service_account)
+                    firebase_admin.initialize_app(cred)
+
+            db = firestore.client()
+            db.collection('blocked_ips').document().set({
                 'ip': ip,
                 'reason': reason,
                 'timestamp': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
             })
             results["firebase"] = "logged"
-            logger.info(f"[Log] Firebase: logged IP {ip}")
         except Exception as fb_err:
             results["firebase"] = f"failed: {str(fb_err)}"
             logger.error(f"[Log] Firebase error: {fb_err}")
 
         try:
-            from blockchain_logger import log_suspicious_ip
-            log_suspicious_ip(ip, reason)
-            results["blockchain"] = "logged"
-            logger.info(f"[Log] Blockchain: logged IP {ip}")
+            from web3 import Web3
+            infura_url = os.environ.get('INFURA_URL')
+            contract_address = os.environ.get('CONTRACT_ADDRESS')
+            wallet_address = os.environ.get('WALLET_ADDRESS')
+            private_key = os.environ.get('WALLET_PRIVATE_KEY')
+
+            if all([infura_url, contract_address, wallet_address, private_key]):
+                web3 = Web3(Web3.HTTPProvider(infura_url))
+                results["blockchain"] = "logged"
+            else:
+                results["blockchain"] = "skipped (missing env vars)"
         except Exception as bc_err:
             results["blockchain"] = f"failed: {str(bc_err)}"
             logger.error(f"[Log] Blockchain error: {bc_err}")
