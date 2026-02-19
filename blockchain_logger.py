@@ -5,11 +5,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# --- Load configuration from environment variables ----
 infura_url = os.environ.get('INFURA_URL')
 contract_address = os.environ.get('CONTRACT_ADDRESS')
 
-# Load ABI from file
 with open('abi.json', 'r') as f:
     contract_abi = json.load(f)
 
@@ -30,9 +28,6 @@ def log_suspicious_ip(ip, reason):
     print(f"[Blockchain] Logged {ip} - Reason: {reason} - TX: {web3.to_hex(tx_hash)}")
 
 def get_blocked_ips_from_blockchain():
-    """
-    Retrieve all blocked IPs from the blockchain smart contract.
-    """
     try:
         web3 = Web3(Web3.HTTPProvider(infura_url))
         contract = web3.eth.contract(address=contract_address, abi=contract_abi)

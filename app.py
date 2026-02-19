@@ -37,7 +37,6 @@ def verify_password(email, password):
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', os.urandom(32).hex())
 
-# Configure comprehensive logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -48,28 +47,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Store request times per IP for DDoS detection
 requests_per_ip = defaultdict(list)
-DDOS_THRESHOLD = 9     # requests per minute
+DDOS_THRESHOLD = 9
 
-# Email configuration for notifications (now dynamic from Firebase)
 SMTP_SERVER = 'smtp.gmail.com'
 SMTP_PORT = 587
 
-# Constants for repeated string literals
 SIGNUP_TEMPLATE = 'signup.html'
 ERR_INVALID_API_KEY = "Invalid API key"
 ERR_INTERNAL_SERVER = "Internal server error"
 
-# Hybrid blocking: NACL (network) + Proactive checking (application)
-blocked_ips_proactive = set()  # For proactive application-level checking
-unblocked_ips = []  # Track unblocked IPs with timestamps
+blocked_ips_proactive = set()
+unblocked_ips = []
 
-# TEMPORARY DEBUGGING: Uncomment to clear blocked IPs on startup
-#blocked_ips_proactive.clear()
-#print("DEBUG: Cleared all blocked IPs from memory")
-
-# Load blocked IPs for proactive checking
 try:
     from blockchain_logger import get_blocked_ips_from_blockchain
     startup_blocked = get_blocked_ips_from_blockchain()
@@ -81,10 +71,8 @@ except Exception as e:
     blocked_ips_proactive = set()
 
 def send_attack_notification(ip, reason):
-    """Send email notification for DDoS attack detection"""
     from firebase_client import get_notification_settings
 
-    # Get notification settings from Firebase
     settings = get_notification_settings()
     if not settings:
         logger.warning("No notification settings found in Firebase")
@@ -115,12 +103,10 @@ BlockSafeguard DDoS Protection System
         logger.error(f"Failed to send notification: {e}")
 
 
-# ---------- DDoS Detection Handler (Calls other modules) ----------
 def handle_ddos(ip):
     logger.warning(f"DDoS detected from IP: {ip}")
 
     try:
-        # Call Blockchain Logger
         from blockchain_logger import log_suspicious_ip
         log_suspicious_ip(ip, "DDoS detected via threshold")
         logger.info(f"> Blockchain logging completed for IP {ip}")
@@ -128,18 +114,15 @@ def handle_ddos(ip):
         logger.error(f"X Blockchain logging failed for IP {ip}: {e}")
 
     try:
-        # Call AWS NACL Blocker
         from aws_blocker import block_ip
         block_ip(ip)
         logger.info(f"> AWS NACL blocking initiated for IP {ip}")
     except Exception as e:
         logger.error(f"X AWS NACL blocking failed for IP {ip}: {e}")
 
-    # Add to proactive blocking set (always works)
     blocked_ips_proactive.add(ip)
     logger.info(f"> IP {ip} added to proactive blocking set")
 
-    # Send email notification
     try:
         send_attack_notification(ip, "DDoS detected via threshold")
         logger.info(f"> Email notification sent for IP {ip}")
@@ -148,49 +131,39 @@ def handle_ddos(ip):
 
     logger.warning(f" DDoS response completed for IP {ip}")
 
-# ---------- Traffic Monitoring ----------
 @app.before_request
 def monitor_traffic():
-    # For testing: Use X-Forwarded-For header if present (simulates different IPs)
     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     now = time.time()
 
-    # Whitelist trusted IPs (add your own IPs here)
-    trusted_ips = ['127.0.0.1', 'localhost', '::1', '192.168.0.105', '10.200.241.254']  # Add your trusted IPs for testing (including IPv6 localhost)
+    trusted_ips = ['127.0.0.1', 'localhost', '::1', '192.168.0.105', '10.200.241.254']
     if ip in trusted_ips:
         return
 
-    # Proactive IP blocking check (defense-in-depth)
     if ip in blocked_ips_proactive:
         logger.warning(f"Proactive block: IP {ip} is in blocked list")
         return "Access Denied: Your IP has been blocked due to suspicious activity.", 403
 
-    # Remove requests older than 60 seconds
     requests_per_ip[ip] = [t for t in requests_per_ip[ip] if (now - t) < 60]
     requests_per_ip[ip].append(now)
 
-
-    # More reasonable detection for normal web browsing
     current_count = len(requests_per_ip[ip])
-    recent_requests = len([r for r in requests_per_ip[ip] if now - r < 10])  # Last 10 seconds
+    recent_requests = len([r for r in requests_per_ip[ip] if now - r < 10])
 
-    # Only trigger on clearly malicious patterns
-    if recent_requests >= 20:  # 20+ requests in 10 seconds = definitely attack
+    if recent_requests >= 20:
         logger.warning(f"[DDOS TRIGGER] IP {ip} sent {recent_requests} requests in 10s")
         handle_ddos(ip)
-    elif len([r for r in requests_per_ip[ip] if now - r < 1]) >= 10:  # 10+ requests per second
+    elif len([r for r in requests_per_ip[ip] if now - r < 1]) >= 10:
         logger.warning(f"[RAPID ATTACK] IP {ip} sent 10+ requests/second")
         handle_ddos(ip)
-    elif current_count >= 50:  # 50+ total requests in session
+    elif current_count >= 50:
         logger.warning(f"[HIGH VOLUME] IP {ip} reached {current_count} total requests")
         handle_ddos(ip)
 
-    # Log request activity for debugging
     if current_count > 2:
         logger.info(f"[REQUEST TRACK] IP {ip}: {current_count} requests, last 10s: {len([r for r in requests_per_ip[ip] if now - r < 10])}")
 
 
-# ---------- Basic Homepage & Demo Endpoint ----------
 @app.route('/')
 def index():
     first_name = session.get('first_name')
@@ -206,7 +179,6 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
-        # Here you would validate credentials (omitted for brevity)
         print(f"Received login data: email={email}, password={password}")
         try:
             log_activity('login_activities', {
@@ -216,7 +188,6 @@ def login():
                 'ip': request.remote_addr
             })
             print(f"Login activity logged for {email}")
-            # Fetch user data from Firebase
             user_data = get_user_by_email(email)
             if user_data:
                 session['first_name'] = user_data.get('first_name', 'User')
@@ -229,7 +200,6 @@ def login():
             message = "Error during login."
     return render_template('login.html', message=message)
 
-# ---------- Signup Endpoint with Firebase Integration ----------
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     message = None
@@ -242,17 +212,14 @@ def signup():
         confirm_password = request.form.get('confirmPassword')
         terms = request.form.get('terms') == 'on'
 
-        # Notification settings
         enable_notifications = request.form.get('enableNotifications') == 'on'
-        notification_email = request.form.get('notificationEmail') or email  # Use signup email if not provided
+        notification_email = request.form.get('notificationEmail') or email
         gmail_app_password = request.form.get('gmailAppPassword')
 
-        # Validate notification settings
         if enable_notifications and not gmail_app_password:
             message = "Gmail App Password is required when notifications are enabled."
             return render_template(SIGNUP_TEMPLATE, message=message)
 
-        # Validate password match, terms accepted, etc.
         if password != confirm_password:
             message = "Passwords do not match."
             return render_template(SIGNUP_TEMPLATE, message=message)
@@ -261,7 +228,6 @@ def signup():
             return render_template(SIGNUP_TEMPLATE, message=message)
 
         try:
-            # Call to create Firebase auth user and store extra data
             user_id = signup_user(email, password, {
                 'email': email,
                 'first_name': first_name,
@@ -270,20 +236,17 @@ def signup():
                 'terms_accepted': terms,
                 'timestamp': time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
                 'ip': request.remote_addr,
-                # Notification settings
                 'enable_notifications': enable_notifications,
                 'notification_email': notification_email,
                 'gmail_app_password': gmail_app_password
             })
             print(f"User created with UID: {user_id}")
 
-            # (Optional) Log signup activity for analytics
             log_activity('signup_activities', {
                 'email': email,
                 'timestamp': time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
                 'ip': request.remote_addr
             })
-            # Set session and redirect
             session['first_name'] = first_name
             return redirect(url_for('index'))
 
@@ -316,15 +279,12 @@ def unblock(ip):
     if verify_password(email, password):
         from aws_blocker import unblock_ip
         unblock_ip(ip)
-        # Also remove from proactive blocking
         blocked_ips_proactive.discard(ip)
-        # Record the unblock action
         unblocked_ips.append({
             'ip': ip,
             'timestamp': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),
             'unblocked_by': session.get('first_name', 'Unknown')
         })
-        # Keep only last 50 unblocked IPs
         if len(unblocked_ips) > 50:
             unblocked_ips.pop(0)
         logger.info(f"IP {ip} unblocked from both NACL and proactive checking")
@@ -341,9 +301,7 @@ def block(ip):
     email = session['email']
 
     if verify_password(email, password):
-        # Manual block logic
         try:
-            # Call Blockchain Logger
             from blockchain_logger import log_suspicious_ip
             log_suspicious_ip(ip, "Manual block")
             logger.info(f"> Blockchain logging completed for IP {ip}")
@@ -351,14 +309,12 @@ def block(ip):
             logger.error(f"X Blockchain logging failed for IP {ip}: {e}")
 
         try:
-            # Call AWS NACL Blocker
             from aws_blocker import block_ip
             block_ip(ip)
             logger.info(f"> AWS NACL blocking initiated for IP {ip}")
         except Exception as e:
             logger.error(f"X AWS NACL blocking failed for IP {ip}: {e}")
 
-        # Add to proactive blocking set
         blocked_ips_proactive.add(ip)
         logger.info(f"> IP {ip} added to proactive blocking set")
 
@@ -367,17 +323,12 @@ def block(ip):
     else:
         return jsonify({"error": "Invalid password"}), 403
 
-# ---------- API Endpoints for Extension Integration ----------
-
 @app.route('/api/status/<api_key>', methods=['GET'])
 def api_status(api_key):
-    """API endpoint to get protection status"""
     try:
-        # Simple API key validation (in production, use proper authentication)
         if api_key != 'demo_key':
             return jsonify({"error": ERR_INVALID_API_KEY}), 401
 
-        # Get blocked IPs from blockchain
         from blockchain_logger import get_blocked_ips_from_blockchain
         blocked_ips_list = get_blocked_ips_from_blockchain()
 
@@ -385,8 +336,8 @@ def api_status(api_key):
             "status": "active",
             "blocked_ips_count": len(blocked_ips_list),
             "total_requests": sum(len(requests) for requests in requests_per_ip.values()),
-            "recent_requests": len([r for requests in requests_per_ip.values() for r in requests if time.time() - r < 300]),  # Last 5 minutes
-            "blocked_ips": blocked_ips_list[-10:],  # Last 10 blocked IPs
+            "recent_requests": len([r for requests in requests_per_ip.values() for r in requests if time.time() - r < 300]),
+            "blocked_ips": blocked_ips_list[-10:],
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         }), 200
 
@@ -396,7 +347,6 @@ def api_status(api_key):
 
 @app.route('/api/check', methods=['POST'])
 def api_check():
-    """API endpoint for extension to check if IP should be blocked"""
     try:
         data = request.get_json()
 
@@ -406,12 +356,9 @@ def api_check():
         api_key = data.get('api_key')
         ip = data.get('ip', request.remote_addr)
 
-
-        # Simple API key validation
         if api_key != 'demo_key':
             return jsonify({"error": ERR_INVALID_API_KEY}), 401
 
-        # Check if IP is blocked
         if ip in blocked_ips_proactive:
             return jsonify({
                 "action": "block",
@@ -419,7 +366,6 @@ def api_check():
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             }), 403
 
-        # Log the check request
         logger.info(f"API check for IP {ip} from extension")
 
         return jsonify({
@@ -434,7 +380,6 @@ def api_check():
 
 @app.route('/api/unblock/<api_key>/<ip>', methods=['POST'])
 def api_unblock(api_key, ip):
-    """API endpoint to unblock an IP"""
     try:
         if api_key != 'demo_key':
             return jsonify({"error": ERR_INVALID_API_KEY}), 401
@@ -456,24 +401,7 @@ def api_unblock(api_key, ip):
     except Exception as e:
         logger.error(f"API unblock error: {e}")
         return jsonify({"error": ERR_INTERNAL_SERVER}), 500
-#@app.route('/debug/clear')
-#def debug_clear():
-    if 'first_name' in session:  # Only logged-in users
-        old_count = len(blocked_ips_proactive)
-        blocked_ips_proactive.clear()
-        return f"Cleared {old_count} blocked IPs"
-    return "Unauthorized", 403    
-# Add this temporary route to see all blocked IPs
-#@app.route('/debug/blocked')
-#def debug_blocked():
-    return {
-        'blockchain_ips': len(get_blocked_ips_from_blockchain()),
-        'proactive_ips': len(blocked_ips_proactive),
-        'all_proactive': list(blocked_ips_proactive)
-    }
 
 
-#----------- Run the Flask App ----------#
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-
