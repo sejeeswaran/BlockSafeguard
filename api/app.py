@@ -147,17 +147,18 @@ def _get_firestore_db():
     from firebase_admin import credentials, firestore
 
     if not firebase_admin._apps:
-        sa_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
-        if sa_json:
-            cred = credentials.Certificate(json.loads(sa_json))
+        # Try FIREBASE_SERVICE_ACCOUNT_JSON first, then FIREBASE_SERVICE_ACCOUNT
+        sa_raw = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON") or os.environ.get("FIREBASE_SERVICE_ACCOUNT")
+        if sa_raw and sa_raw.strip().startswith("{"):
+            # Value is JSON content (pasted directly into env var)
+            cred = credentials.Certificate(json.loads(sa_raw))
+            firebase_admin.initialize_app(cred)
+        elif sa_raw and os.path.exists(sa_raw):
+            # Value is a file path (local development)
+            cred = credentials.Certificate(sa_raw)
             firebase_admin.initialize_app(cred)
         else:
-            sa_path = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
-            if sa_path and os.path.exists(sa_path):
-                cred = credentials.Certificate(sa_path)
-                firebase_admin.initialize_app(cred)
-            else:
-                raise RuntimeError("No Firebase credentials configured")
+            raise RuntimeError("No Firebase credentials configured")
 
     _firebase_db = firestore.client()
     return _firebase_db
