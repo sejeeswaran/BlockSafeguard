@@ -249,7 +249,7 @@ def _log_ip_to_blockchain(ip, reason):
 
 def _get_blocked_ips_from_blockchain():
     """Read all blocked IPs from the smart contract."""
-    web3, contract, _, _ = _get_web3_contract()
+    _, contract, _, _ = _get_web3_contract()
     length = contract.functions.getLength().call()
     blocked = []
     for i in range(length):
@@ -296,7 +296,6 @@ def _unblock_ip_aws(ip):
     if not nacl_id or not region:
         raise RuntimeError("AWS_NACL_ID / AWS_REGION not configured")
 
-    ec2 = boto3.client("ec2", region_name=region)
     # In serverless we can't track rule numbers across invocations,
     # so this is a best-effort approach
     logger.info(f"[AWS] Unblock requested for {ip} (manual NACL cleanup may be needed)")
@@ -347,7 +346,6 @@ def login():
     message = None
     if request.method == "POST":
         email = request.form.get("email")
-        password = request.form.get("password")
         try:
             _firebase_log_activity("login_activities", {
                 "email": email,
