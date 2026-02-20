@@ -1,5 +1,1 @@
 Flask
-firebase-admin
-boto3
-web3
-python-dotenv
