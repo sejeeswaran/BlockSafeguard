@@ -13,6 +13,7 @@ BlockSafeguard is a comprehensive cybersecurity solution that provides real-time
 - 🚫 **Automated IP Blocking**: Instant blocking at network and application levels
 - ⛓️ **Blockchain Integration**: Immutable audit trails for all security actions
 - ☁️ **AWS NACL Integration**: Network-level protection using AWS security groups
+- 🚀 **Serverless Ready**: Vercel-compatible backend (`api/app.py`) for highly scalable deployments
 - 🔐 **Firebase Authentication**: Secure user management with role-based access
 - 📊 **Web Dashboard**: Intuitive interface for IP management and monitoring
 - 🛡️ **Password Protection**: Additional security for sensitive operations
@@ -25,8 +26,8 @@ BlockSafeguard is a comprehensive cybersecurity solution that provides real-time
 - **Blockchain**: Solidity, Web3.py
 - **Database**: Firebase Firestore
 - **Cloud**: AWS (EC2, NACL)
+- **Deployment**: Vercel Serverless, Gunicorn, Docker
 - **Authentication**: Firebase Auth
-- **Deployment**: Gunicorn, Docker
 
 ## 📋 Prerequisites
 
@@ -128,10 +129,14 @@ python -m pytest
 ```
 BSGuard/
 ├── app.py                 # Main Flask application
+├── api/                   # Vercel Serverless Functions
+│   └── app.py             # Serverless backend entry point
 ├── firebase_client.py     # Firebase integration
 ├── aws_blocker.py         # AWS NACL management
 ├── blockchain_logger.py   # Blockchain interactions
 ├── BlockSafeguard.sol     # Smart contract
+├── update_contract.py     # Automated contract address updater
+├── test_attack.py         # Automated DDoS testing suite
 ├── templates/             # HTML templates
 │   ├── index.html
 │   ├── login.html
@@ -150,7 +155,13 @@ BSGuard/
 python app.py
 ```
 
-### Production Deployment
+### Vercel Serverless Deployment
+The repository is configured for serverless deployment on Vercel via `vercel.json` and the `api/app.py` entry point. Use the Vercel CLI to deploy:
+```bash
+vercel --prod
+```
+
+### Production Deployment (VM/Docker)
 ```bash
 gunicorn --bind 0.0.0.0:8000 app:app
 ```
