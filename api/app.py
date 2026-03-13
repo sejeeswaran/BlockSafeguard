@@ -419,7 +419,7 @@ def signup():
     return render_template(SIGNUP_TEMPLATE, message=message)
 
 
-@app.route("/logout")
+@app.route("/logout", methods=["GET"])
 def logout():
     session.pop("first_name", None)
     session.pop("email", None)
